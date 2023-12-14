@@ -2,8 +2,7 @@
   <div class="content-wrapper">
     <section class="hero is-small">
       <div class="hero-body">
-        <p class="title">
-          List of works by Vincent van Gogh </p>
+        <p class="title">塔克鼠美术馆</p>
 
       </div>
     </section>
@@ -15,6 +14,16 @@
           <select v-model="selectedYear">
             <option value="">时间</option>
             <option v-for="year in yearOptions" :key="year" :value="year">{{ year }}年</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="control">
+        <div class="select">
+          <select v-model="selectedArtist">
+            <option value="">艺术家</option>
+            <option value="Vincent van Gogh">梵高</option>
+            <option value="Vermeer">维米尔</option>
           </select>
         </div>
       </div>
@@ -40,7 +49,7 @@
         </div>
 
         <div class="content align-bottom">
-          <h6>{{ artwork.title }}</h6>
+          <h6>{{ artwork.title_zh || artwork.title }}</h6>
           <p class="subtitle is-6">{{ artwork.year }}年</p>
         </div>
       </div>
@@ -85,6 +94,7 @@ export default {
       itemsPerPage: 20,
       yearOptions: [], // 年份选项
       selectedYear: '', // 选中的年份
+      selectedArtist: '', // 默认选中
       searchText: '', // 搜索文本
     };
   },
@@ -124,6 +134,7 @@ export default {
       this.dataContent = this.allData.filter(item => {
         item.title
         return (this.selectedYear === '' || item.year === this.selectedYear) &&
+          (this.selectedArtist === '' || item.artist === this.selectedArtist) &&
           (!this.searchText || String(item.title).toLowerCase().includes(this.searchText.toLowerCase()));
       });
     },
@@ -146,7 +157,7 @@ export default {
     }
   },
   created() {
-    axios.get('data.json')
+    axios.get('translated_data.json')
       .then(response => {
         const processedData = response.data.map(item => {
           if (item.imageUrl) {
@@ -207,11 +218,12 @@ export default {
   /* dark background*/
 }
 
-/* 媒体查询 - 在小屏幕下显示两列 */
-@media only screen and (width: 375px) and (height: 812px) {
-  .content-wrapper {
-    width: 100%;
-    /* 页面宽度为100%，适用于小屏幕 */
+@media (max-width: 768px) {
+  .column.is-6-mobile {
+    flex: 0 0 50%;
+    /* 在移动设备上占用50%的宽度 */
+    max-width: 50%;
+    /* 最大宽度为50% */
   }
 }
 </style>
