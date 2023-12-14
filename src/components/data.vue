@@ -31,7 +31,8 @@
         <div class="card">
           <div class="card-image">
             <figure class="image">
-              <a :href="artwork.bigImageUrl" data-fancybox="gallery" :data-caption="artwork.title">
+              <a :href="artwork.bigImageUrl" data-fancybox="gallery"
+                :data-caption="artwork.title + '<br>' + artwork.dimension + '<br>' + artwork.location">
                 <img v-if="artwork.imageUrl" :src="artwork.imageUrl" :alt="artwork.title">
               </a>
             </figure>
@@ -39,7 +40,7 @@
         </div>
 
         <div class="content align-bottom">
-          <h5>{{ artwork.title }}</h5>
+          <h6>{{ artwork.title }}</h6>
           <p class="subtitle is-6">{{ artwork.year }}年</p>
         </div>
       </div>
@@ -145,7 +146,7 @@ export default {
     }
   },
   created() {
-    axios.get('artworks.json')
+    axios.get('data.json')
       .then(response => {
         const processedData = response.data.map(item => {
           if (item.imageUrl) {
@@ -202,7 +203,8 @@ export default {
 }
 
 .fancybox__container {
-    --fancybox-bg: rgba(0, 0, 0, 1); /* dark background*/
+  --fancybox-bg: rgba(0, 0, 0, 1);
+  /* dark background*/
 }
 
 /* 媒体查询 - 在小屏幕下显示两列 */
