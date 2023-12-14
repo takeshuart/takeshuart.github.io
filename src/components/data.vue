@@ -3,9 +3,8 @@
     <section class="hero is-small">
       <div class="hero-body">
         <p class="title">
-          List of works by Vincent van Gogh        </p>
-        <p class="subtitle">
-                  </p>
+          List of works by Vincent van Gogh </p>
+
       </div>
     </section>
     <h1></h1>
@@ -32,7 +31,9 @@
         <div class="card">
           <div class="card-image">
             <figure class="image">
-              <img v-if="artwork.imageUrl" :src="artwork.imageUrl" :alt="artwork.title">
+              <a :href="artwork.bigImageUrl" data-fancybox="gallery" :data-caption="artwork.title">
+                <img v-if="artwork.imageUrl" :src="artwork.imageUrl" :alt="artwork.title">
+              </a>
             </figure>
           </div>
         </div>
@@ -44,19 +45,17 @@
       </div>
 
     </div>
-    <div v-else>Loading data...</div>
+    <div v-else>em....世界名画被偷走了，追踪中...</div>
     <nav class="pagination is-rounded column is-half is-offset-one-quarter" role="navigation" aria-label="pagination"
       v-if="totalPages > 1">
       <ul class="pagination-list">
         <li><a class="pagination-link" @click="changePage(1)" :class="{ 'is-current': currentPage === 1 }"
             aria-label="Goto page 1">1</a></li>
-        <!-- 如果当前页码距离首页有间隔，显示省略号 -->
         <li v-if="currentPage > 3"><span class="pagination-ellipsis">&hellip;</span></li>
         <li v-for="page in pagesToShow" :key="page">
           <a class="pagination-link" @click="changePage(page)" :class="{ 'is-current': page === currentPage }"
             :aria-label="'Goto page ' + page">{{ page }}</a>
         </li>
-        <!-- 如果当前页码距离尾页有间隔，显示省略号 -->
         <li v-if="currentPage < totalPages - 2"><span class="pagination-ellipsis">&hellip;</span></li>
         <li v-if="totalPages > 1"><a class="pagination-link" @click="changePage(totalPages)"
             :class="{ 'is-current': currentPage === totalPages }" :aria-label="'Goto page ' + totalPages">{{ totalPages
@@ -71,6 +70,8 @@
 <script>
 import axios from 'axios';
 import 'bulma/css/bulma.css';
+import { Fancybox } from "@fancyapps/ui";
+import "@fancyapps/ui/dist/fancybox/fancybox.css";
 
 export default {
   name: 'MyComponent',
@@ -146,10 +147,23 @@ export default {
   created() {
     axios.get('artworks.json')
       .then(response => {
-        this.allData = response.data;
+        const processedData = response.data.map(item => {
+          if (item.imageUrl) {
+            item.bigImageUrl = item.imageUrl.replace(/200px(?=[^/]*$)/, "1500px");
+          }
+          return item;
+        })
+        this.allData = processedData;
+        console.log(processedData)
         this.filterData(); // 应用初始过滤
         this.dataLoaded = true;
         this.yearOptions = this.getUniqueYears(this.allData);
+        Fancybox.bind("[data-fancybox]", {
+          Thumbs: {
+            showOnStart: false, //hide thumbnails initially
+          }
+        });
+        Fancybox.Thumbs = false;
 
       })
       .catch(error => {
@@ -185,6 +199,10 @@ export default {
   flex-direction: column;
   justify-content: flex-end;
   /* 垂直对齐到底部 */
+}
+
+.fancybox__container {
+    --fancybox-bg: rgba(0, 0, 0, 1); /* dark background*/
 }
 
 /* 媒体查询 - 在小屏幕下显示两列 */
