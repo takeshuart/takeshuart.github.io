@@ -1,14 +1,11 @@
 <template>
-  <div class="content-wrapper">
-    <section class="hero is-small">
-      <div class="hero-body">
+  <div  class="content-wrapper">
+      <div class="hero-body is-small">
         <p class="title">塔克鼠美术馆</p>
-
       </div>
-    </section>
     <h1></h1>
     <!-- 搜索框 -->
-    <div class="field has-addons column is-half is-offset-one-quarter">
+    <div class="field has-addons column is-two-thirds  is-offset-1   mb-1">
       <div class="control">
         <div class="select">
           <select v-model="selectedYear">
@@ -17,13 +14,11 @@
           </select>
         </div>
       </div>
-
       <div class="control">
-        <div class="select">
+        <div class="select"> 
           <select v-model="selectedArtist">
             <option value="">艺术家</option>
-            <option value="Vincent van Gogh">梵高</option>
-            <option value="Vermeer">维米尔</option>
+            <option v-for="at in artistOptions" :key="at" :value="at">{{ at }}</option>
           </select>
         </div>
       </div>
@@ -34,6 +29,10 @@
         <button class="button is-info" @click="filterData">搜索</button>
       </div>
     </div>
+    <div v-if="dataLoaded && dataContent.length > 0" class="has-text-grey column mt-1 mb-2">
+      找到 {{ dataContent.length }} 件艺术品
+    </div>
+
     <!--内容-->
     <div v-if="dataLoaded" class="columns is-multiline is-variable is-6">
       <div v-for="artwork in paginatedData" :key="artwork.catNo" class="column is-6-mobile is-4-tablet is-3-desktop">
@@ -50,7 +49,7 @@
 
         <div class="content align-bottom">
           <h6>{{ artwork.title_zh || artwork.title }}</h6>
-          <p class="subtitle is-6">{{ artwork.year }}年</p>
+          <p class="subtitle is-6">{{ artwork.artist + ',' + artwork.year }}年</p>
         </div>
       </div>
 
@@ -100,7 +99,7 @@ export default {
   },
   computed: {
     totalPages() {
-      return Math.ceil(this.allData.length / this.itemsPerPage);
+      return Math.ceil(this.dataContent.length / this.itemsPerPage);
     },
     pagesToShow() {
       let pages = [];
@@ -130,7 +129,6 @@ export default {
   },
   methods: {
     filterData() {
-
       this.dataContent = this.allData.filter(item => {
         item.title
         return (this.selectedYear === '' || item.year === this.selectedYear) &&
@@ -154,14 +152,24 @@ export default {
       if (newPage >= 1 && newPage <= this.totalPages) {
         this.currentPage = newPage;
       }
-    }
+    },
+    shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    },
+
   },
   created() {
     axios.get('translated_data.json')
       .then(response => {
-        const processedData = response.data.map(item => {
+        const shuffledArray = this.shuffleArray(response.data);//random item
+        const processedData = shuffledArray.map(item => {
           if (item.imageUrl) {
-            item.bigImageUrl = item.imageUrl.replace(/200px(?=[^/]*$)/, "1500px");
+            item.imageUrl = item.imageUrl.replace(/100px(?=[^/]*$)/, "200px");
+            item.bigImageUrl = item.imageUrl.replace(/(100px|150px|200px)(?=[^/]*$)/, "1000px");
           }
           return item;
         })
@@ -169,7 +177,20 @@ export default {
         console.log(processedData)
         this.filterData(); // 应用初始过滤
         this.dataLoaded = true;
-        this.yearOptions = this.getUniqueYears(this.allData);
+
+        const years = new Set();
+        const artists = new Set();
+        this.allData.forEach(item => {
+          if (item.year) {
+            years.add(item.year);
+          }
+          if(item.artist){
+            artists.add(item.artist)
+          }
+        });
+
+        this.yearOptions = years;
+        this.artistOptions = artists;
         Fancybox.bind("[data-fancybox]", {
           Thumbs: {
             showOnStart: false, //hide thumbnails initially
@@ -213,10 +234,6 @@ export default {
   /* 垂直对齐到底部 */
 }
 
-.fancybox__container {
-  --fancybox-bg: rgba(0, 0, 0, 1);
-  /* dark background*/
-}
 
 @media (max-width: 768px) {
   .column.is-6-mobile {
