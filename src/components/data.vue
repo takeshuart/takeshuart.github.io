@@ -22,7 +22,7 @@
           </select>
         </div>
       </div>
-      <div class="control is-expanded">
+      <div class="control">
         <input class="input" type="text" v-model="searchText" @keyup.enter="handleEnter" placeholder="作品关键词">
       </div>
       <div class="control">
