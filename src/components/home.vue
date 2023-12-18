@@ -203,7 +203,7 @@ export default {
     };
   },
   created() {
-    axios.get('translated_data.json')
+    axios.get('artworks.json')
       .then(response => {
         const shuffledArray = this.shuffleArray(response.data);//random item
 
