@@ -1,5 +1,5 @@
 <template>
-  <section class="section has-background-black pb-4 pt-6">
+  <section class="section has-background-black pb-4 pt-6 ">
     <div class="container "><!-- container Automatic centering -->
       <div class="">
         <p class="title is-size-3 has-text-white-ter mb-5" style="text-align: left;">塔克鼠名画馆</p>
@@ -8,26 +8,24 @@
   </section>
   <section class="section  pb-4"> <!--pt-5 padding-top size -->
     <div class="container pb-5 custom-border-bottom">
-        <!-- 搜索框 -->
-        <SearchComponent :eraOptions="eraOptions" :top20Tags="top20Tags" @era-changed="handleEraChange"
-          @enter-keyup="handleEnter" @filter-data="doSearch" @checkbox-changed="handleCheckboxChange"
-          @tag-query="handleTagQuery" />
+      <!-- 搜索框 -->
+      <SearchComponent :eraOptions="eraOptions" :top20Tags="top20Tags" @era-changed="handleEraChange"
+        @enter-keyup="handleEnter" @filter-data="doSearch" @checkbox-changed="handleCheckboxChange"
+        @tag-query="handleTagQuery" />
     </div>
-
   </section>
   <!--内容-->
   <section class="section pt-4">
     <div class="container">
-      <div v-if="dataLoaded && dataContent.length > 0" class="has-text-grey  has-text-weight-bold mb-4">
-      找到 {{ dataContent.length }} 件艺术品
-    </div>
-    
-      <div v-if="dataLoaded" class="columns is-multiline  ">
-        <div v-for="artwork in paginatedData" :key="artwork.title"
-          class="column is-full-mobile is-4-tablet is-3-desktop ">
-          <div class="card mt-4"> <!--mt-4 margin-top顶部边距-->
+      <div v-if="dataLoaded && dataContent.length >= 0" class="has-text-grey  has-text-weight-bold mb-4">
+        找到 {{ dataContent.length }} 件艺术品
+      </div>
+
+      <div v-if="dataLoaded" class="columns is-multiline is-mobile"><!--is-mobile make is-6-mobile work-->
+        <div v-for="artwork in paginatedData" :key="artwork.title" class="column is-6-mobile is-4-tablet is-3-desktop ">
+          <div class="card mt-4 mt-3-tablet mt-0-mobile"> <!--mt-4 margin-top顶部边距，移动端无边距-->
             <div class="card-image">
-              <figure class="image">
+              <figure class="image has-background-white-bis	">
                 <a :href="artwork.bigImageUrl" data-fancybox="gallery"
                   :data-caption="artwork.title + '<br>' + artwork.dimension + '<br>' + artwork.location">
                   <img v-if="artwork.imageUrl" :src="artwork.imageUrl" :alt="artwork.title">
@@ -35,10 +33,10 @@
               </figure>
             </div>
           </div>
-          <div class="content mt-3">
+          <div class="content mt-3 mt-0-mobile">
             <h6>{{ artwork.title_zh || artwork.title }}</h6>
-            <p class="subtitle is-6">{{ artwork.artist + ',' + artwork.year }}年</p>
-            <p class="subtitle is-6">{{ artwork.museum }}</p>
+            <p class="subtitle is-6 m-1 m-0-mobile">{{ artwork.artist + ',' + artwork.year }}</p>
+            <p class="subtitle is-6 mt-0 hide-mobile">{{ artwork.museum }}</p>
           </div>
         </div>
       </div>
@@ -72,8 +70,10 @@ export default {
     doSearch(query) {
       if (query) {
         this.dataContent = this.allData.filter(item => {
+          //
+          const text = `${item.year} ${item.title} ${item.museum} ${item.location} `
           return this.checkEra(item.year, query.eraSelected) &&
-            (!query.searchText || String(item.title).toLowerCase().includes(query.searchText.toLowerCase()));
+            (!query.searchText || text.toLowerCase().includes(query.searchText.toLowerCase()));
         });
       } else {
         this.dataContent = this.allData;
@@ -216,7 +216,7 @@ export default {
 
           item.imageUrl = item.imageUrl.replace(/(100px|150px|200px|128px)(?=[^/]*$)/, "300px");
           if (item.imageOriginal && item.museum.includes('Metropolitan')) {
-            
+
             item.bigImageUrl = item.imageOriginal.replace(/web-large/, "orignal");//should be handled in the ELT phase.
           } else {
             item.bigImageUrl = item.imageUrl.replace(/(300px)(?=[^/]*$)/, "2000px");
@@ -273,11 +273,23 @@ export default {
 }
 
 .card-image img {
-  height: 350px;
+  height: 300px;
   /* 固定高度 */
   width: 300px;
   /* 宽度自适应 */
   object-fit: scale-down;
+}
+
+@media screen and (max-width: 768px) {
+  .card-image img {
+    height: 150px; 
+    width:  200px; 
+  }
+}
+@media screen and (max-width: 768px) {
+    .hide-mobile {
+        display: none;
+    }
 }
 
 .column {
