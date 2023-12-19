@@ -1,24 +1,27 @@
 <template>
-  <section class="section">
-    <div class="container">
-
+  <section class="section has-background-black pb-4 pt-6">
+    <div class="container "><!-- container Automatic centering -->
       <div class="">
-        <p class="title">塔克鼠美术馆</p>
-      </div>
-      <!-- 搜索框 -->
-      <div class="column is-full field  mb-1">
-        <SearchComponent :eraOptions="eraOptions" :top20Tags="top20Tags" @era-changed="handleEraChange"
-          @enter-keyup="handleEnter" @filter-data="doSearch" @checkbox-changed="handleCheckboxChange"
-          @tag-query="handleTagQuery" />
-      </div>
-      <div v-if="dataLoaded && dataContent.length > 0" class="has-text-grey column mt-1 mb-2">
-        找到 {{ dataContent.length }} 件艺术品
+        <p class="title is-size-3 has-text-white-ter mb-5" style="text-align: left;">塔克鼠名画馆</p>
       </div>
     </div>
   </section>
+  <section class="section  pb-4"> <!--pt-5 padding-top size -->
+    <div class="container pb-5 custom-border-bottom">
+        <!-- 搜索框 -->
+        <SearchComponent :eraOptions="eraOptions" :top20Tags="top20Tags" @era-changed="handleEraChange"
+          @enter-keyup="handleEnter" @filter-data="doSearch" @checkbox-changed="handleCheckboxChange"
+          @tag-query="handleTagQuery" />
+    </div>
+
+  </section>
   <!--内容-->
-  <section class="section">
+  <section class="section pt-4">
     <div class="container">
+      <div v-if="dataLoaded && dataContent.length > 0" class="has-text-grey  has-text-weight-bold mb-4">
+      找到 {{ dataContent.length }} 件艺术品
+    </div>
+    
       <div v-if="dataLoaded" class="columns is-multiline  ">
         <div v-for="artwork in paginatedData" :key="artwork.title"
           class="column is-full-mobile is-4-tablet is-3-desktop ">
@@ -212,7 +215,13 @@ export default {
           if (!item.imageUrl) { return false }
 
           item.imageUrl = item.imageUrl.replace(/(100px|150px|200px|128px)(?=[^/]*$)/, "300px");
-          item.bigImageUrl = item.imageUrl.replace(/(100px|150px|200px|128px)(?=[^/]*$)/, "1000px");
+          if (item.imageOriginal && item.museum.includes('Metropolitan')) {
+            
+            item.bigImageUrl = item.imageOriginal.replace(/web-large/, "orignal");//should be handled in the ELT phase.
+          } else {
+            item.bigImageUrl = item.imageUrl.replace(/(300px)(?=[^/]*$)/, "2000px");
+
+          }
 
           const interval = this.calcEra(parseInt(item.year));
           if (interval) {
@@ -253,9 +262,9 @@ export default {
 </script>
 
 <style>
-.content-wrapper {
-  width: 60%;
-  margin: 0 auto;
+.custom-border-bottom {
+  border-bottom: 1px solid #e3e1e1;
+  /* 定义边框样式和颜色 */
 }
 
 .card {
