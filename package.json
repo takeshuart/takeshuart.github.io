@@ -2,7 +2,7 @@
   "name": "takeshu",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://MayGoat.github.io/tuckermouse-museum/",
+  "homepage": ".",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
