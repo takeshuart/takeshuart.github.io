@@ -1,12 +1,12 @@
 <template>
-  <section class="section has-background-black pb-4 pt-6 ">
+  <section class="section has-background-black pb-4 pt-5  py-1-mobile">
     <div class="container "><!-- container Automatic centering -->
       <div class="">
-        <p class="title is-size-3 has-text-white-ter mb-5" style="text-align: left;">塔克鼠名画馆</p>
+        <p class="title is-size-3 is-size-5-mobile has-text-white-ter mb-5">塔克鼠名画馆</p>
       </div>
     </div>
   </section>
-  <section class="section is-medium pt-8 pb-10  has-background-white-bis	 ">
+  <section class="section is-medium pt-8 pb-10 py-0-mobile  has-background-white-bis	 ">
     <div class="columns ">
       <div class="column is-1" />
       <div class="column is-7">
@@ -16,22 +16,21 @@
           </a><!--优先展示有画框的作品-->
         </figure>
       </div>
-      <div class="column is-3">
-        <div class="content has-text-left">
-
-          <p class="subtitle is-3 has-text-weight-bold  mt-6">
+      <div class="column is-3 py-0-mobile ">
+        <div class="content has-text-left ">
+          <p class="subtitle is-3 is-size-6-mobile has-text-weight-bold  mt-6 my-0-mobile">
             <span v-if="surpriseArtWork.title">{{ surpriseArtWork.title }}</span>
             <span v-if="surpriseArtWork.year"> （{{ surpriseArtWork.year }}）</span>
           </p>
-          <p class="subtitle is-5" v-if="surpriseArtWork.artist">艺术家：{{ surpriseArtWork.artist }}</p>
-          <p class="subtitle is-5">
+          <p class="subtitle is-5 is-size-6-mobile" v-if="surpriseArtWork.artist">艺术家：{{ surpriseArtWork.artist }}</p>
+          <p class="subtitle is-5 is-size-6-mobile">
             <span v-if="surpriseArtWork.museum">藏馆：{{ surpriseArtWork.museum }}</span>
             <span v-if="surpriseArtWork.location"> {{ surpriseArtWork.location }}</span>
           </p>
         </div>
       </div>
       <div class="column is-1">
-        <a class="button is-large" @click="changeSurpriseArt">
+        <a class="button is-large " @click="changeSurpriseArt">
           <span class="icon is-large">
             <i class="fa fa-dice-five"></i>
           </span>
@@ -59,8 +58,9 @@
         <div v-if="dataLoaded" class="columns is-multiline is-mobile"><!--is-mobile make is-6-mobile work-->
           <div v-for="artwork in loadMoreData" :key="artwork.title"
             class="column is-6-mobile is-4-tablet is-3-desktop ">
-            <div class="card mt-4 mt-3-tablet mt-0-mobile"> <!--mt-4 margin-top顶部边距，移动端无边距-->
-              <div class="card-image">
+            <!-- is-shadowless remove-->
+            <div class="card mt-4 mt-3-tablet mt-0-mobile "> <!--mt-4 margin-top顶部边距，移动端无边距-->
+              <div class="card-image	">
                 <figure class="image has-background-white-bis	">
                   <a :href="artwork.bigImageUrl" data-fancybox="gallery"
                     :data-caption="artwork.title + '<br>' + artwork.dimension + '<br>' + artwork.location">
@@ -359,10 +359,6 @@ export default {
   /* 定义边框样式和颜色 */
 }
 
-.card {
-  box-shadow: none;
-  /* Use this to remove the shadow */
-}
 
 .card-image img {
   height: 200px;
@@ -435,6 +431,20 @@ export default {
     /* 在移动设备上占用50%的宽度 */
     max-width: 50%;
     /* 最大宽度为50% */
+  }
+}
+@media screen and (max-width: 768px) { /* bulma得is-*-mobile类好像只对文本有效 */
+  .py-0-mobile { 
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  .py-1-mobile {
+    padding-top: 10px !important;
+    padding-bottom: 5px !important;
+  }
+  .my-0-mobile{
+    margin-top: 0 !important;
+    margin-bottom:0 !important;
   }
 }
 </style>
