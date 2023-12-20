@@ -54,3 +54,5 @@ Deploy to GitHub Pages: Run npm run deploy to deploy your project to GitHub Page
 Access your project: Your Vue.js project should now be accessible at https://<username>.github.io/<repository>/.
 
 Make sure your GitHub repository is public, and you have the necessary permissions to deploy to GitHub Pages.
+
+## icon example : https://fontawesome.com/v4/examples/

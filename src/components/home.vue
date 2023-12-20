@@ -6,6 +6,33 @@
       </div>
     </div>
   </section>
+  <section class="section is-medium pt-8 pb-10  has-background-white-bis	 ">
+    <div class="columns ">
+      <div class="column is-1" />
+      <div class="column is-7">
+        <figure class="image surpriseme-figure ">
+          <img class="surpriseme-image" :src="surpriseArtWork.bigImageUrl" />
+        </figure>
+      </div>
+      <div class="column is-3 ">
+        <div class="content has-text-left">
+          <p class="subtitle is-4 has-text-weight-bold  mt-6">{{ surpriseArtWork.title + ", " + surpriseArtWork.year }}
+          </p>
+          <p class="subtitle is-5">{{ surpriseArtWork.artist }}</p>
+          <p class="subtitle is-5">{{ surpriseArtWork.museum + ", " + surpriseArtWork.location }}</p>
+        </div>
+      </div>
+      <div class="column is-1">
+          <a class="button is-large" @click="changeSurpriseArt">
+              <span class="icon is-large">
+                <i class="fa fa-dice-five"></i>
+              </span>
+          </a>
+      </div>
+
+
+    </div>
+  </section>
   <section class="section  pb-4"> <!--pt-5 padding-top size -->
     <div class="container pb-5 custom-border-bottom">
       <!-- 搜索框 -->
@@ -15,7 +42,7 @@
     </div>
   </section>
   <!--内容-->
-  <section class="section pt-4">
+  <section class="section artbox pt-4">
     <div class="container">
       <div v-if="dataLoaded && dataContent.length >= 0" class="has-text-grey  has-text-weight-bold mb-4">
         找到 {{ dataContent.length }} 件艺术品
@@ -54,8 +81,10 @@
 import axios from 'axios';
 import nlp from 'compromise';
 import 'bulma/css/bulma.css';
-import { Fancybox } from "@fancyapps/ui";
+import { Fancybox } from "@fancyapps/ui"; //image gallery
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
+//search icon: https://fontawesome.com/search
+import '@fortawesome/fontawesome-free/css/all.css';
 import PaginationComponent from './Pagination.vue';
 import SearchComponent from './Search.vue';
 
@@ -182,6 +211,10 @@ export default {
         return `${Math.floor(year / 100) * 100}-${Math.floor(year / 100) * 100 + 100}`;
       }
       return null;
+    },
+    changeSurpriseArt() {
+      const index = Math.floor(Math.random() * this.highlights.length);
+      this.surpriseArtWork = this.highlights[index];
     }
   },
   computed: {
@@ -191,7 +224,7 @@ export default {
     paginatedData() {//由currentPagede的变更触发
       const start = (this.currentPage - 1) * this.itemsPerPage;
       return this.dataContent.slice(start, start + this.itemsPerPage);
-    },
+    }
   },
   data() {
     return {
@@ -203,6 +236,8 @@ export default {
       eraOptions: {},
       allArtWorkNames: '',
       top20Tags: [],
+      highlights: [],
+      surpriseArtWork: {},
     };
   },
   created() {
@@ -211,6 +246,7 @@ export default {
         const shuffledArray = this.shuffleArray(response.data);//random item
 
         const eraList = {};
+        const highlights = []
         const processedData = shuffledArray.filter(item => {
           if (!item.imageUrl) { return false }
 
@@ -222,7 +258,14 @@ export default {
             item.bigImageUrl = item.imageUrl.replace(/(300px)(?=[^/]*$)/, "2000px");
 
           }
+          //surprise me
+          if (item.isHighlight) {
+            highlights.push(item)
+          }
+          this.highlights = highlights;
+          this.surpriseArtWork = highlights[0]
 
+          //era options
           const interval = this.calcEra(parseInt(item.year));
           if (interval) {
             eraList[interval] = (eraList[interval] || 0) + 1;
@@ -273,26 +316,52 @@ export default {
 }
 
 .card-image img {
-  height: 300px;
+  height: 200px;
   /* 固定高度 */
-  width: 300px;
+  width: 250px;
   /* 宽度自适应 */
   object-fit: scale-down;
 }
 
 @media screen and (max-width: 768px) {
   .card-image img {
-    height: 150px; 
-    width:  200px; 
+    height: 150px;
+    width: 200px;
   }
 }
+
 @media screen and (max-width: 768px) {
-    .hide-mobile {
-        display: none;
-    }
+  .hide-mobile {
+    display: none;
+  }
 }
 
-.column {
+
+.surpriseme-figure {
+  display: flex;
+  justify-content: center;
+  /* 水平居中 */
+  align-items: center;
+  /* 垂直居中 */
+  overflow: hidden;
+  /* 隐藏溢出的部分 */
+}
+
+.surpriseme-image {
+  max-width: 100%;
+  /* 图片最大宽度为其父容器宽度 */
+  max-height: 600px;
+  /* 只设置最大高度，让尺寸自适应父容器，这样可以避免宽图下面大块空白的问题*/
+  width: auto;
+  /* 宽度自适应 */
+  height: auto;
+  /* 高度自适应 */
+  object-fit: contain;
+  /* 保持图片原始长宽比 */
+  object-position: center;
+}
+
+.artbox .column {
   display: flex;
   flex-wrap: wrap;
   /* 使卡片在一行放不下时换行 */
