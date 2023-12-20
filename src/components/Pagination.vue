@@ -1,5 +1,6 @@
+<!--瀑布流页码不再使用-->
 <template>
-    <nav class="pagination is-rounded" role="navigation" aria-label="pagination">
+    <nav class="pagination is-centered" role="navigation" aria-label="pagination">
       <ul class="pagination-list">
         <li><a class="pagination-link" @click="changePage(1)" :class="{ 'is-current': currentPage === 1 }" aria-label="Goto page 1">1</a></li>
         <li v-if="currentPage > 3"><span class="pagination-ellipsis">&hellip;</span></li>

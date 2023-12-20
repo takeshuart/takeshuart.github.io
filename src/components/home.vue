@@ -11,71 +11,86 @@
       <div class="column is-1" />
       <div class="column is-7">
         <figure class="image surpriseme-figure ">
-          <img class="surpriseme-image" :src="surpriseArtWork.bigImageUrl" />
+          <a data-fancybox="gallery" :href="surpriseArtWork.bigImageUrl">
+            <img class="surpriseme-image" @load="surpriseLoaded" :src="surpriseArtWork.bigImageUrl" />
+          </a><!--优先展示有画框的作品-->
         </figure>
       </div>
-      <div class="column is-3 ">
+      <div class="column is-3">
         <div class="content has-text-left">
-          <p class="subtitle is-4 has-text-weight-bold  mt-6">{{ surpriseArtWork.title + ", " + surpriseArtWork.year }}
+
+          <p class="subtitle is-3 has-text-weight-bold  mt-6">
+            <span v-if="surpriseArtWork.title">{{ surpriseArtWork.title }}</span>
+            <span v-if="surpriseArtWork.year"> （{{ surpriseArtWork.year }}）</span>
           </p>
-          <p class="subtitle is-5">{{ surpriseArtWork.artist }}</p>
-          <p class="subtitle is-5">{{ surpriseArtWork.museum + ", " + surpriseArtWork.location }}</p>
+          <p class="subtitle is-5" v-if="surpriseArtWork.artist">艺术家：{{ surpriseArtWork.artist }}</p>
+          <p class="subtitle is-5">
+            <span v-if="surpriseArtWork.museum">藏馆：{{ surpriseArtWork.museum }}</span>
+            <span v-if="surpriseArtWork.location"> {{ surpriseArtWork.location }}</span>
+          </p>
         </div>
       </div>
       <div class="column is-1">
-          <a class="button is-large" @click="changeSurpriseArt">
-              <span class="icon is-large">
-                <i class="fa fa-dice-five"></i>
-              </span>
-          </a>
+        <a class="button is-large" @click="changeSurpriseArt">
+          <span class="icon is-large">
+            <i class="fa fa-dice-five"></i>
+          </span>
+        </a>
       </div>
 
 
     </div>
   </section>
-  <section class="section  pb-4"> <!--pt-5 padding-top size -->
-    <div class="container pb-5 custom-border-bottom">
-      <!-- 搜索框 -->
-      <SearchComponent :eraOptions="eraOptions" :top20Tags="top20Tags" @era-changed="handleEraChange"
-        @enter-keyup="handleEnter" @filter-data="doSearch" @checkbox-changed="handleCheckboxChange"
-        @tag-query="handleTagQuery" />
-    </div>
-  </section>
-  <!--内容-->
-  <section class="section artbox pt-4">
-    <div class="container">
-      <div v-if="dataLoaded && dataContent.length >= 0" class="has-text-grey  has-text-weight-bold mb-4">
-        找到 {{ dataContent.length }} 件艺术品
+  <div v-if="isSurpriseLoaded">
+    <section class="section  pb-4"> <!--pt-5 padding-top size -->
+      <div class="container pb-5 custom-border-bottom">
+        <!-- 搜索框 -->
+        <SearchComponent :eraOptions="eraOptions" :top20Tags="top20Tags" @era-changed="handleEraChange"
+          @enter-keyup="handleEnter" @filter-data="doSearch" @checkbox-changed="handleCheckboxChange"
+          @tag-query="handleTagQuery" />
       </div>
-
-      <div v-if="dataLoaded" class="columns is-multiline is-mobile"><!--is-mobile make is-6-mobile work-->
-        <div v-for="artwork in paginatedData" :key="artwork.title" class="column is-6-mobile is-4-tablet is-3-desktop ">
-          <div class="card mt-4 mt-3-tablet mt-0-mobile"> <!--mt-4 margin-top顶部边距，移动端无边距-->
-            <div class="card-image">
-              <figure class="image has-background-white-bis	">
-                <a :href="artwork.bigImageUrl" data-fancybox="gallery"
-                  :data-caption="artwork.title + '<br>' + artwork.dimension + '<br>' + artwork.location">
-                  <img v-if="artwork.imageUrl" :src="artwork.imageUrl" :alt="artwork.title">
-                </a>
-              </figure>
+    </section>
+    <!--内容-->
+    <section class="section artbox pt-4">
+      <div class="container">
+        <div v-if="filtedData.length >= 0" class="has-text-grey  has-text-weight-bold mb-4">
+          找到 {{ filtedData.length }} 件艺术品
+        </div>
+        <div v-if="dataLoaded" class="columns is-multiline is-mobile"><!--is-mobile make is-6-mobile work-->
+          <div v-for="artwork in loadMoreData" :key="artwork.title"
+            class="column is-6-mobile is-4-tablet is-3-desktop ">
+            <div class="card mt-4 mt-3-tablet mt-0-mobile"> <!--mt-4 margin-top顶部边距，移动端无边距-->
+              <div class="card-image">
+                <figure class="image has-background-white-bis	">
+                  <a :href="artwork.bigImageUrl" data-fancybox="gallery"
+                    :data-caption="artwork.title + '<br>' + artwork.dimension + '<br>' + artwork.location">
+                    <img v-if="artwork.imageUrl" :src="artwork.imageUrl" :alt="artwork.title">
+                  </a>
+                </figure>
+              </div>
+            </div>
+            <div class="content mt-3 mt-0-mobile">
+              <h6>{{ artwork.title_zh || artwork.title }}</h6>
+              <p class="subtitle is-6 m-1 m-0-mobile">{{ artwork.artist + ',' + artwork.year }}</p>
+              <p class="subtitle is-6 mt-0 hide-mobile">{{ artwork.museum }}</p>
             </div>
           </div>
-          <div class="content mt-3 mt-0-mobile">
-            <h6>{{ artwork.title_zh || artwork.title }}</h6>
-            <p class="subtitle is-6 m-1 m-0-mobile">{{ artwork.artist + ',' + artwork.year }}</p>
-            <p class="subtitle is-6 mt-0 hide-mobile">{{ artwork.museum }}</p>
-          </div>
         </div>
+        <div v-else>哎呀，很抱歉。馆藏都被借走展览了。</div>
+
       </div>
-      <div v-else>em....世界名画被偷走了，追踪中...</div>
-    </div>
-  </section>
-  <section class="section">
-    <div class="column is-justify-content-center">
-      <PaginationComponent v-if="totalPages > 1" :current-page="currentPage" :total-pages="totalPages"
-        @page-changed="changePage" />
-    </div>
-  </section>
+    </section>
+    <section class="section">
+      <div>
+        <button class="button" @click="loadMore" v-if="!allDataLoaded && dataLoaded">
+          加载更多({{ currentPage }}/{{ pageCount }})...
+        </button>
+      </div>
+      <div class="mt-5">
+        <button class="button is-Medium" @click="scrollToTop">返回顶部</button>
+      </div>
+    </section>
+  </div>
 </template>
 <script>
 import axios from 'axios';
@@ -85,7 +100,6 @@ import { Fancybox } from "@fancyapps/ui"; //image gallery
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 //search icon: https://fontawesome.com/search
 import '@fortawesome/fontawesome-free/css/all.css';
-import PaginationComponent from './Pagination.vue';
 import SearchComponent from './Search.vue';
 
 
@@ -93,52 +107,60 @@ export default {
   name: 'MyComponent',
   components: {
     SearchComponent,
-    PaginationComponent,
+  },
+  watch: {
+    //`filtedData` has changed, maybe a search operation.
+    filtedData() {
+      this.pageCount = Math.ceil(this.filtedData.length / this.pageSize);
+      this.currentPage = 1;
+      console.log('data has changed')
+      this.loadMoreData=[];//清空页面内容，修改引用后触发vue加载新的结果集dataContent
+      this.loadMore();
+    },
   },
   methods: {
     doSearch(query) {
       if (query) {
-        this.dataContent = this.allData.filter(item => {
-          //
+        this.filtedData = this.allData.filter(item => {
           const text = `${item.year} ${item.title} ${item.museum} ${item.location} `
           return this.checkEra(item.year, query.eraSelected) &&
             (!query.searchText || text.toLowerCase().includes(query.searchText.toLowerCase()));
         });
       } else {
-        this.dataContent = this.allData;
+        this.filtedData = this.allData;
       }
     },
     handleCheckboxChange(isChecked) {
       if (isChecked) {
-        this.dataContent = this.allData.filter(item => {
+        this.filtedData = this.allData.filter(item => {
           return item.isHighlight == true;
         });
       } else {
-        this.dataContent = this.allData;
+        this.filtedData = this.allData;
       }
     },
 
     handleEraChange(eraSelected) {
       if (!eraSelected) {
-        this.dataContent = this.allData
+        this.filtedData = this.allData
         return;
       }
-      this.dataContent = this.allData.filter(item => {
+      this.filtedData = this.allData.filter(item => {
         return this.checkEra(item.year, eraSelected);
       })
     },
     museumchange(museumSelected) {
       if (!museumSelected) {
-        this.dataContent = this.allData
+        this.filtedData = this.allData
         return;
       }
-      this.dataContent = this.allData.filter(item => {
+      this.filtedData = this.allData.filter(item => {
         return this.checkEra(item.museum, museumSelected);
       })
     },
     handleTagQuery(tag) {
       // const tag = event.target.value;
-      this.dataContent = this.allData.filter(item => {
+      this.filtedData = this.allData.filter(item => {
         return String(item.title).toLowerCase().includes(tag.toLowerCase())
       })
     },
@@ -161,9 +183,24 @@ export default {
     handleEnter(query) {
       this.doSearch(query);
     },
-    changePage(newPage) {
-      if (newPage >= 1 && newPage <= this.totalPages) {
-        this.currentPage = newPage;
+    // changePage(newPage) {
+    //   if (newPage >= 1 && newPage <= this.totalPages) {
+    //     this.currentPage = newPage;
+    //   }
+    // }
+    // ,
+    loadMore() {
+      const nextPage = this.currentPage + 1;
+      const start = (nextPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      const newItems = this.filtedData.slice(start, end);
+
+      //页面不会重新渲染所有datacontent内容
+      //vue基于虚拟DOM，根据一个dom元素的key判断是否已经加载，仅增加新内容
+      this.loadMoreData = [...this.loadMoreData, ...newItems];
+      this.currentPage = nextPage;
+      if (this.loadMoreData.length >= this.filtedData.length) {
+        this.allDataLoaded = true;
       }
     },
     shuffleArray(array) {
@@ -215,29 +252,41 @@ export default {
     changeSurpriseArt() {
       const index = Math.floor(Math.random() * this.highlights.length);
       this.surpriseArtWork = this.highlights[index];
+    },
+    //surprise art has loaded and start to load content
+    surpriseLoaded() {
+      this.isSurpriseLoaded = true
+    },
+    scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   },
   computed: {
     totalPages() { //由dataContent的变更触发
-      return Math.ceil(this.dataContent.length / this.itemsPerPage);
+      return Math.ceil(this.filtedData.length / this.pageSize);
     },
-    paginatedData() {//由currentPagede的变更触发
-      const start = (this.currentPage - 1) * this.itemsPerPage;
-      return this.dataContent.slice(start, start + this.itemsPerPage);
-    }
+    // paginatedData() {//由currentPagede的变更触发
+    //   const start = (this.currentPage - 1) * this.itemsPerPage;
+    //   return this.dataContent.slice(start, start + this.itemsPerPage);
+    // }
+
   },
   data() {
     return {
       allData: [],
-      dataContent: [],
+      filtedData: [],
+      loadMoreData: [],
       dataLoaded: false,
       currentPage: 1,
-      itemsPerPage: 32,
+      pageSize: 20,
+      pageCount: 0,
       eraOptions: {},
       allArtWorkNames: '',
       top20Tags: [],
       highlights: [],
       surpriseArtWork: {},
+      isSurpriseLoaded: false,
+
     };
   },
   created() {
@@ -256,7 +305,6 @@ export default {
             item.bigImageUrl = item.imageOriginal.replace(/web-large/, "orignal");//should be handled in the ELT phase.
           } else {
             item.bigImageUrl = item.imageUrl.replace(/(300px)(?=[^/]*$)/, "2000px");
-
           }
           //surprise me
           if (item.isHighlight) {
@@ -281,9 +329,10 @@ export default {
         });
         this.eraOptions = filteredEraList;
 
-        this.allData = processedData;
-        this.doSearch(); // 应用初始过滤
+        this.filtedData = this.allData = processedData;
 
+        this.loadMore(); // 应用初始过滤
+        this.pageCount = Math.ceil(this.allData.length / this.pageSize)
         this.dataLoaded = true;
 
         Fancybox.bind("[data-fancybox]", {

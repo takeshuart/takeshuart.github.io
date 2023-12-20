@@ -56,3 +56,7 @@ Access your project: Your Vue.js project should now be accessible at https://<us
 Make sure your GitHub repository is public, and you have the necessary permissions to deploy to GitHub Pages.
 
 ## icon example : https://fontawesome.com/v4/examples/
+
+To-Do:
+1. 预览图上传到github，这样国内也能访问，虽然慢点
+2. 开发管理后台，建立艺术品和图片数据库，可以网页端编辑。
