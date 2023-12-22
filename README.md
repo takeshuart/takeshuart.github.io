@@ -3,8 +3,10 @@ The Paintings Database is an extensive art database, primarily sourced from open
 Unlike Google Art, this project aims to offer a comprehensive database of paintings for art enthusiasts to view and search.
 
 ## website
+
 https://takeshuart.github.io/
+
 ![Homepage Screenshot](src/assets/1Capture.PNG)
-![Detail Page Screenshot](src/assets/2Capture.PNG)
+![Detail Page Screenshot](src/assets/Capture1.PNG)
 
 
