@@ -18,19 +18,22 @@
       </div>
       <div class="column is-3 py-0-mobile ">
         <div class="content has-text-left ">
-          <p class="subtitle is-3 is-size-6-mobile has-text-weight-bold  mt-6 my-0-mobile">
+          <p class="subtitle is-5 is-size-6-mobile has-text-weight-bold  mt-6 my-0-mobile">
             <span v-if="surpriseArtWork.title">{{ surpriseArtWork.title }}</span>
             <span v-if="surpriseArtWork.year"> （{{ surpriseArtWork.year }}）</span>
           </p>
-          <p class="subtitle is-5 is-size-6-mobile" v-if="surpriseArtWork.artist">艺术家：{{ surpriseArtWork.artist }}</p>
-          <p class="subtitle is-5 is-size-6-mobile">
+          <p class="subtitle is-6 is-size-6-mobile " v-if="surpriseArtWork.artist">艺术家：{{ surpriseArtWork.artist }}</p>
+          <p class="subtitle is-6 is-size-6-mobile">
             <span v-if="surpriseArtWork.museum">藏馆：{{ surpriseArtWork.museum }}</span>
             <span v-if="surpriseArtWork.location"> {{ surpriseArtWork.location }}</span>
+          </p>
+          <p>
+            <span v-if="surpriseArtWork.shortDesc"> {{ surpriseArtWork.shortDesc }}</span>
           </p>
         </div>
       </div>
       <div class="column is-1">
-        <a class="button is-large " @click="changeSurpriseArt">
+        <a class="button is-large" @click="changeSurpriseArt">
           <span class="icon is-large">
             <i class="fa fa-dice-five"></i>
           </span>
@@ -56,8 +59,7 @@
           找到 {{ filtedData.length }} 件艺术品
         </div>
         <div v-if="dataLoaded" class="columns is-multiline is-mobile"><!--is-mobile make is-6-mobile work-->
-          <div v-for="artwork in loadMoreData" :key="artwork.title"
-            class="column is-6-mobile is-4-tablet is-3-desktop ">
+          <div v-for="artwork in loadMoreData" :key="artwork.title" class="column is-6-mobile is-4-tablet is-4-desktop ">
             <!-- is-shadowless remove-->
             <div class="card mt-4 mt-3-tablet mt-0-mobile "> <!--mt-4 margin-top顶部边距，移动端无边距-->
               <div class="card-image	">
@@ -70,9 +72,12 @@
               </div>
             </div>
             <div class="content mt-3 mt-0-mobile">
-              <h6>{{ artwork.title_zh || artwork.title }}</h6>
-              <p class="subtitle is-6 m-1 m-0-mobile">{{ artwork.artist + ',' + artwork.year }}</p>
-              <p class="subtitle is-6 mt-0 hide-mobile">{{ artwork.museum }}</p>
+              <p class="is-size-6 is-size-7-mobile has-text-weight-bold">
+                <span>{{ artwork.title_zh || artwork.title }}</span>
+                <span v-if="artwork.year">{{ ',' + artwork.year }}</span>
+              </p>
+              <p class="subtitle is-6 is-size-7-mobile m-1 m-0-mobile">{{ artwork.artist }}</p>
+              <p class="subtitle is-6 is-size-7-mobile mt-0 hide-mobile">{{ artwork.museum }}</p>
             </div>
           </div>
         </div>
@@ -82,12 +87,20 @@
     </section>
     <section class="section">
       <div>
-        <button class="button" @click="loadMore" v-if="!allDataLoaded && dataLoaded">
-          加载更多({{ currentPage }}/{{ pageCount }})...
+        <div v-if="allDataLoaded" class="message">
+          没有更多数据
+        </div>
+        <button v-else-if="showLoadMoreBtn" class="button is-medium" @click="handleLoadMoreClick">
+          加载更多 ({{ currentPage }}/{{ pageCount }})
         </button>
       </div>
       <div class="mt-5">
-        <button class="button is-Medium" @click="scrollToTop">返回顶部</button>
+        <a class="button" @click="scrollToTop">
+          <span>返回顶部</span>
+          <span class="icon is-large">
+            <i class="fa-solid fa-up-long"></i>
+          </span>
+        </a>
       </div>
     </section>
   </div>
@@ -110,15 +123,41 @@ export default {
   },
   watch: {
     //`filtedData` has changed, maybe a search operation.
+    //The function name in 'watch' must be the same as the name of the variable being watched.
     filtedData() {
+      //reset some variable 
+      this.autoLoadCount = 1;
+      this.allDataLoaded = false
+      this.currentPage = 0;
       this.pageCount = Math.ceil(this.filtedData.length / this.pageSize);
-      this.currentPage = 1;
-      console.log('data has changed')
-      this.loadMoreData=[];//清空页面内容，修改引用后触发vue加载新的结果集dataContent
+      this.loadMoreData = [];//清空页面内容，修改引用后触发vue加载新的结果集dataContent
+
       this.loadMore();
     },
   },
+
+  mounted() {
+    window.addEventListener('scroll', this.handleScroll);
+  },
   methods: {
+
+    //scroll to load next page
+    handleScroll() {
+      const scrollY = window.scrollY;//视窗以上已滑过的高度
+      const windowHeight = window.innerHeight;//当前视窗高度
+      const documentHeight = document.documentElement.scrollHeight; //整个文档的高度，包括下面不可见但已加载的内容
+      // 当滚动到底部时，加载下一页
+      const bottomOfWindow = scrollY + windowHeight >= documentHeight - 100;
+      if (bottomOfWindow) {
+        if (this.autoLoadCount < this.maxAutoLoad) {
+          this.autoLoadCount++;
+          this.loadMore();//auto load
+        } else {
+          this.showLoadMoreBtn = true;
+        }
+        // console.log(`autoLoadCount: ${this.autoLoadCount}, showLoadMoreButton:${this.showLoadMoreBtn},allDataLoaded:${this.allDataLoaded}`)
+      }
+    },
     doSearch(query) {
       if (query) {
         this.filtedData = this.allData.filter(item => {
@@ -183,6 +222,13 @@ export default {
     handleEnter(query) {
       this.doSearch(query);
     },
+
+    //点击一次load more,可以通过下滑页面自动加载2页。
+    handleLoadMoreClick() {
+      this.autoLoadCount = 1; // reset auto load
+      this.showLoadMoreBtn = false;
+      this.loadMore()
+    },
     // changePage(newPage) {
     //   if (newPage >= 1 && newPage <= this.totalPages) {
     //     this.currentPage = newPage;
@@ -190,7 +236,7 @@ export default {
     // }
     // ,
     loadMore() {
-      const nextPage = this.currentPage + 1;
+      const nextPage = this.currentPage + 1
       const start = (nextPage - 1) * this.pageSize;
       const end = start + this.pageSize;
       const newItems = this.filtedData.slice(start, end);
@@ -198,11 +244,15 @@ export default {
       //页面不会重新渲染所有datacontent内容
       //vue基于虚拟DOM，根据一个dom元素的key判断是否已经加载，仅增加新内容
       this.loadMoreData = [...this.loadMoreData, ...newItems];
-      this.currentPage = nextPage;
+      this.currentPage = nextPage
+
+      console.log(`loadMoreDataSize:${this.loadMoreData.length},allDataSize:${this.filtedData.length}`)
+
       if (this.loadMoreData.length >= this.filtedData.length) {
         this.allDataLoaded = true;
       }
     },
+
     shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -253,7 +303,7 @@ export default {
       const index = Math.floor(Math.random() * this.highlights.length);
       this.surpriseArtWork = this.highlights[index];
     },
-    //surprise art has loaded and start to load content
+    //surprise artwork has loaded ,then start to load content
     surpriseLoaded() {
       this.isSurpriseLoaded = true
     },
@@ -278,7 +328,7 @@ export default {
       loadMoreData: [],
       dataLoaded: false,
       currentPage: 1,
-      pageSize: 20,
+      pageSize: 15,
       pageCount: 0,
       eraOptions: {},
       allArtWorkNames: '',
@@ -286,7 +336,10 @@ export default {
       highlights: [],
       surpriseArtWork: {},
       isSurpriseLoaded: false,
-
+      autoLoadCount: 1,
+      maxAutoLoad: 3,
+      showLoadMoreBtn: false,
+      allDataLoaded: false
     };
   },
   created() {
@@ -361,9 +414,9 @@ export default {
 
 
 .card-image img {
-  height: 200px;
+  height: 300px;
   /* 固定高度 */
-  width: 250px;
+  width: 350px;
   /* 宽度自适应 */
   object-fit: scale-down;
 }
@@ -433,18 +486,23 @@ export default {
     /* 最大宽度为50% */
   }
 }
-@media screen and (max-width: 768px) { /* bulma得is-*-mobile类好像只对文本有效 */
-  .py-0-mobile { 
+
+@media screen and (max-width: 768px) {
+
+  /* bulma得is-*-mobile类好像只对文本有效 */
+  .py-0-mobile {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
   }
+
   .py-1-mobile {
     padding-top: 10px !important;
     padding-bottom: 5px !important;
   }
-  .my-0-mobile{
+
+  .my-0-mobile {
     margin-top: 0 !important;
-    margin-bottom:0 !important;
+    margin-bottom: 0 !important;
   }
 }
 </style>

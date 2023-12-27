@@ -13,7 +13,12 @@
                 @keyup.enter="$emit('enter-keyup', { searchText, eraSelected })" placeholder="作品关键词">
         </p>
         <p class="control ">
-            <a class="button" @click="$emit('filter-data', { searchText, eraSelected })">搜索</a>
+            <a class="button" @click="$emit('filter-data', { searchText, eraSelected })">
+                <span class="icon">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+            </a>
+
         </p>
     </div>
     <div class="field is-grouped  mt-5 is-size-5 is-size-6-mobile"> <!--left-align-->
@@ -46,7 +51,5 @@ export default {
 };
 </script>
     
-<style>
-
-</style>
+<style></style>
 
